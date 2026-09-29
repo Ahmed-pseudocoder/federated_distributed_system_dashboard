@@ -47,4 +47,3 @@ class CheckpointManager:
         checkpoint = self.load(selected)
         model.load_state_dict(checkpoint["model_state_dict"])
         return Path(selected), checkpoint
-

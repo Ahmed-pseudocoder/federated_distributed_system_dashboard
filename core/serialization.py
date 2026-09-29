@@ -17,4 +17,3 @@ def validate_state_dict(candidate, reference) -> None:
             raise ValueError(f"shape mismatch for {key}")
         if torch.is_floating_point(tensor) and not torch.isfinite(tensor).all():
             raise ValueError(f"non-finite values in {key}")
-

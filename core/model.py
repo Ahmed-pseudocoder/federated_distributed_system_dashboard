@@ -29,4 +29,3 @@ class SmallCNN(nn.Module):
 def create_model(seed: int = 42) -> SmallCNN:
     torch.manual_seed(seed)
     return SmallCNN()
-

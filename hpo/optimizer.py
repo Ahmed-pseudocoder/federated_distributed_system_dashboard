@@ -44,4 +44,3 @@ def optimize(
     best = max(completed, key=lambda trial: trial["accuracy"]) if completed else None
     logger.set_state("hpo_summary", {"trials": results, "best": best})
     return {"trials": results, "best": best}
-

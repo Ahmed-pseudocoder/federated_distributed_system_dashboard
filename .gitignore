@@ -9,4 +9,3 @@ results/**
 logs/**/*.log
 logs/*.log
 *.pyc
-

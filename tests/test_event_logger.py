@@ -25,4 +25,3 @@ def test_event_and_telemetry_are_persisted(tmp_path):
     assert '"answer": 43' in events[0]["payload_json"]
     assert telemetry[0]["batch"] == 37
     assert telemetry[0]["global_step"] == 225
-

@@ -16,4 +16,3 @@ def test_checkpoint_save_and_restore(tmp_path):
     assert restored_path == path
     assert checkpoint["round"] == 3
     assert all(torch.equal(model.state_dict()[key], value) for key, value in expected.items())
-

@@ -27,4 +27,3 @@ def test_weighted_fedavg_uses_sample_counts():
 def test_incomplete_update_is_rejected():
     with pytest.raises(ValueError, match="incomplete"):
         weighted_fedavg([update(1), update(3, complete=False)])
-

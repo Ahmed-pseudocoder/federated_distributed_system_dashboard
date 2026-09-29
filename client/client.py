@@ -90,4 +90,3 @@ def client_process(client_id: int, command_queue, event_queue, config) -> None:
     finally:
         heartbeat_stop.set()
         logger.info("Client %s exiting", client_id)
-

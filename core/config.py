@@ -61,4 +61,3 @@ class FLConfig:
             if isinstance(value, Path):
                 result[key] = str(value)
         return result
-

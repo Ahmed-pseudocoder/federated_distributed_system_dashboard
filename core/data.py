@@ -107,4 +107,3 @@ def ensure_mnist_available(config) -> None:
     """Download files before processes start; no samples are sent to the coordinator."""
     datasets.MNIST(config.data_dir, train=True, download=True)
     datasets.MNIST(config.data_dir, train=False, download=True)
-

@@ -1,2 +1,1 @@
 """Federated coordinator components."""
-

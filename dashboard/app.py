@@ -193,4 +193,3 @@ else:
     )
     if best_id is not None:
         st.success(f"Best actual trial: {best_id}")
-

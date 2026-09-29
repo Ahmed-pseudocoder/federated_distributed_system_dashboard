@@ -17,4 +17,3 @@ class FaultDetector:
             for client_id in pending
             if self.is_timed_out(records[client_id].last_heartbeat, now)
         ]
-

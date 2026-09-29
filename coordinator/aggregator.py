@@ -33,4 +33,3 @@ def weighted_fedavg(updates: list[dict], reference_state: dict | None = None):
             largest = max(updates, key=lambda item: int(item["sample_count"]))
             result[key] = largest["state_dict"][key].clone()
     return result
-

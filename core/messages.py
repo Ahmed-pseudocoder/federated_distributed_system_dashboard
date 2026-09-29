@@ -28,4 +28,3 @@ class Telemetry:
 
 def message(kind: str, **payload: Any) -> dict[str, Any]:
     return {"kind": kind, "timestamp": utc_now(), **payload}
-

@@ -68,4 +68,3 @@ class WorkerRegistry:
 
     def snapshot(self, client_id: int) -> dict:
         return asdict(self.clients[client_id])
-

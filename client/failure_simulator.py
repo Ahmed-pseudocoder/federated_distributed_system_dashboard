@@ -22,4 +22,3 @@ def trigger_failure(mode: str, heartbeat_stop) -> None:
         while True:
             time.sleep(60)
     raise ValueError(f"unsupported failure mode: {mode}")
-

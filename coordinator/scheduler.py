@@ -15,4 +15,3 @@ class DynamicScheduler:
         if limit is not None:
             eligible = eligible[:limit]
         return [record.client_id for record in eligible]
-

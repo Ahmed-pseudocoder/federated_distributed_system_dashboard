@@ -10,4 +10,3 @@ def test_failed_clients_are_not_selected():
 def test_reliability_affects_priority():
     records = [ClientRecord(1, reliability=0.5), ClientRecord(2, reliability=1.0)]
     assert DynamicScheduler().select(records)[0] == 2
-

@@ -159,4 +159,3 @@ class EventLogger:
     def fetch_all(self, query: str, parameters: tuple = ()) -> list[dict]:
         with self._connect() as connection:
             return [dict(row) for row in connection.execute(query, parameters).fetchall()]
-

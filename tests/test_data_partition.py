@@ -20,4 +20,3 @@ def test_client_partitions_are_disjoint():
     assert partitions[0].isdisjoint(partitions[1])
     assert partitions[0].isdisjoint(partitions[2])
     assert partitions[1].isdisjoint(partitions[2])
-

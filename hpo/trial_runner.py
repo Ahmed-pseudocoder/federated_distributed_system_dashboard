@@ -44,4 +44,3 @@ def run_trial(spec: dict) -> dict:
     except BaseException as exc:
         result.update(accuracy=None, duration=time.monotonic() - started, status="FAILED", error=repr(exc))
     return result
-

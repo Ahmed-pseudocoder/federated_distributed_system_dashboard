@@ -164,4 +164,3 @@ The key event types are `SYSTEM_STARTED`, `CLIENT_CONNECTED`, `CLIENT_HEARTBEAT`
 Accuracy and loss are computed by evaluating the aggregated global model on a bounded MNIST test subset. Round duration, participation, update counts, detection latency, recovery time, and client utilization come from execution timestamps and messages. The small data bounds favor an observable laptop demo rather than maximum accuracy.
 
 This MVP demonstrates data locality and crash recovery, but it is not a production privacy or security system. It does **not** implement secure aggregation, differential privacy, encrypted model updates, client authentication, Byzantine/adversarial-client defenses, WAN transport, durable queue delivery, or automatic worker replacement. A production evolution would add those controls, remote transport, replicated coordinator state, signed updates, and privacy accounting.
-

@@ -361,4 +361,3 @@ class FederatedCoordinator:
 
 def run_federated(config) -> dict:
     return FederatedCoordinator(config).run()
-

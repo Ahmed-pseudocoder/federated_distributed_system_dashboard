@@ -18,4 +18,3 @@ def make_telemetry(client_id: int, progress: dict, loss=None, accuracy=None, sta
         status=status,
         pid=os.getpid(),
     ).to_dict()
-

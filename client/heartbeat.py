@@ -24,4 +24,3 @@ class HeartbeatEmitter(threading.Thread):
                 message("heartbeat", client_id=self.client_id, pid=os.getpid(), **snapshot)
             )
             self.stop_event.wait(self.interval)
-

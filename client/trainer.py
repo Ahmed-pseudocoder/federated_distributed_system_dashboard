@@ -119,4 +119,3 @@ def train_local(
         "metrics": metrics,
         "complete": True,
     }
-
