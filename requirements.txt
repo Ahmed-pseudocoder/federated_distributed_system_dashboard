@@ -1,0 +1,10 @@
+torch>=2.2
+torchvision>=0.17
+numpy>=1.26
+pandas>=2.1
+plotly>=5.18
+streamlit>=1.31
+psutil>=5.9
+optuna>=3.5
+pytest>=8.0
+
