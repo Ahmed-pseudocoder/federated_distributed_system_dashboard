@@ -86,6 +86,9 @@ if workers:
         heartbeat_age = max(0.0, now - float(worker.get("last_heartbeat", now)))
         with column:
             st.markdown(f"### {icon} Client {worker['client_id']}")
+            if worker.get("hostname"):
+                address = worker.get("remote_addr", "unknown address")
+                st.caption(f"{worker['hostname']} · {address} · {worker.get('transport', 'local')}")
             st.write(f"**{status}** · PID {worker.get('pid', '—')}")
             st.write(
                 f"Round {worker.get('current_round', 0)} · Epoch {worker.get('current_epoch', 0)} · Batch {worker.get('current_batch', 0)}"

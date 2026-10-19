@@ -108,6 +108,111 @@ The dashboard never invents status or metrics. It reads the selected SQLite run 
 - global and client training charts; and
 - measured HPO trials with the best result highlighted.
 
+## Two-laptop LAN mode
+
+The repository also contains a real network transport. Two laptops run independent worker programs and communicate with an HTTP coordinator over the local network:
+
+```text
+                    COORDINATOR HTTP API
+              global model · scheduler · SQLite
+                192.168.1.10:8000
+                    /             \
+       model task /               \ model task
+                 v                 v
+      LAPTOP A / Client 1      LAPTOP B / Client 2
+      local MNIST partition    local MNIST partition
+      heartbeat + telemetry    heartbeat + telemetry
+                 \                 /
+          complete model updates only
+```
+
+The coordinator records each laptop's hostname, source IP, PID, heartbeat age, training position, and metrics. Client images and labels never cross the network. Model snapshots and completed model updates are encoded as tensor-only PyTorch state dictionaries and sent in authenticated JSON requests.
+
+You can use a third computer as the coordinator, or run the coordinator and Client 1 in separate terminals on Laptop A while Laptop B runs Client 2. The latter requires only two physical laptops.
+
+### 1. Prepare both laptops
+
+Clone this repository on each machine and install the same dependencies:
+
+```powershell
+git clone https://github.com/Ahmed-pseudocoder/federated_distributed_system_dashboard.git
+cd federated_distributed_system_dashboard
+py -3.11 -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+Connect both laptops to the same trusted private network. On the coordinator laptop, run `ipconfig` and note its IPv4 address—for example `192.168.1.10`. Permit inbound TCP port 8000 for Python on the **Private** Windows Firewall profile if Windows prompts. Do not expose this demo service directly to the public internet.
+
+Choose one shared token and use it on every command. The examples use `my-lan-demo-secret`; replace it for your demonstration.
+
+### 2. Start the coordinator
+
+On the coordinator laptop:
+
+```powershell
+$env:FL_SHARED_TOKEN = "my-lan-demo-secret"
+python run_network_coordinator.py --host 0.0.0.0 --port 8000 --clients 2
+```
+
+It waits until both worker IDs have registered. Test reachability from the other laptop:
+
+```powershell
+Invoke-RestMethod http://192.168.1.10:8000/health
+```
+
+### 3. Start Client 1
+
+On Laptop A in a second terminal (or on a separate worker laptop):
+
+```powershell
+$env:FL_SHARED_TOKEN = "my-lan-demo-secret"
+python run_network_worker.py --client-id 1 --coordinator http://192.168.1.10:8000
+```
+
+### 4. Start Client 2
+
+On Laptop B:
+
+```powershell
+$env:FL_SHARED_TOKEN = "my-lan-demo-secret"
+python run_network_worker.py --client-id 2 --coordinator http://192.168.1.10:8000
+```
+
+With defaults, both laptops train for rounds 1–3. During round 4, Client 2 finishes epoch 2 / batch 37, sends the last completed telemetry, and genuinely exits via `os._exit(42)` before uploading a model update. The coordinator observes the missing heartbeat over the network, records the remote hostname/IP and exact last point, restores round 3, excludes Client 2, and continues with Client 1.
+
+For a fast rehearsal:
+
+```powershell
+# Coordinator
+python run_network_coordinator.py --clients 2 --rounds 3 --local-epochs 1 `
+  --max-train-samples 96 --max-test-samples 128 `
+  --failure-round 2 --failure-epoch 1 --failure-batch 2 `
+  --heartbeat-timeout 2 --run-id lan_rehearsal
+```
+
+Use the same worker commands; workers obtain the training configuration from the coordinator automatically.
+
+### 5. Monitor both laptops
+
+On the coordinator laptop, start the existing dashboard:
+
+```powershell
+python -m streamlit run dashboard/app.py
+```
+
+Select `lan_demo.db` (or your chosen `--run-id`) in the sidebar. Worker cards include the real hostname, LAN address, HTTP transport, PID, heartbeat age, and latest batch. The failure panel and timeline are populated from the coordinator's persisted network events.
+
+Authenticated diagnostic endpoints are also available:
+
+```powershell
+$headers = @{ Authorization = "Bearer my-lan-demo-secret" }
+Invoke-RestMethod http://192.168.1.10:8000/status -Headers $headers
+Invoke-RestMethod http://192.168.1.10:8000/events?limit=20 -Headers $headers
+```
+
+The LAN mode uses a shared bearer token but plain HTTP. It is appropriate for a controlled classroom/private-network demonstration, not an untrusted or internet-facing deployment. Production use would require TLS, per-worker identities, signed updates, replay protection, secure aggregation, and a hardened model serialization protocol.
+
 ## Dynamic allocation
 
 Eligible clients are sorted by an explainable score:
