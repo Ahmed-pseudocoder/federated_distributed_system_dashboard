@@ -1,0 +1,158 @@
+name: federated-learning-demo
+
+services:
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: fl-coordinator
+    init: true
+    environment:
+      FL_SHARED_TOKEN: ${FL_SHARED_TOKEN:-change-me}
+    command:
+      - python
+      - run_network_coordinator.py
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --clients
+      - "2"
+      - --rounds
+      - ${FL_ROUNDS:-10}
+      - --local-epochs
+      - ${FL_LOCAL_EPOCHS:-2}
+      - --batch-size
+      - ${FL_BATCH_SIZE:-32}
+      - --max-train-samples
+      - ${FL_TRAIN_SAMPLES:-1200}
+      - --max-test-samples
+      - ${FL_TEST_SAMPLES:-2000}
+      - --heartbeat-timeout
+      - ${FL_HEARTBEAT_TIMEOUT:-3}
+      - --round-timeout
+      - ${FL_ROUND_TIMEOUT:-300}
+      - --failure-mode
+      - ${FL_FAILURE_MODE:-process_crash}
+      - --failure-client
+      - "2"
+      - --failure-round
+      - ${FL_FAILURE_ROUND:-4}
+      - --failure-epoch
+      - ${FL_FAILURE_EPOCH:-2}
+      - --failure-batch
+      - ${FL_FAILURE_BATCH:-37}
+      - --run-id
+      - ${FL_RUN_ID:-docker_demo}
+      - --results-dir
+      - /app/results
+      - --checkpoint-dir
+      - /app/checkpoints/docker_demo
+      - --log-dir
+      - /app/logs/docker_demo
+    ports:
+      - "${FL_COORDINATOR_PORT:-8000}:8000"
+    volumes:
+      - coordinator_data:/app/data
+      - ./results:/app/results
+      - ./checkpoints:/app/checkpoints
+      - ./logs:/app/logs
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: "no"
+
+  client-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: fl-client-1
+    init: true
+    environment:
+      FL_SHARED_TOKEN: ${FL_SHARED_TOKEN:-change-me}
+    command:
+      - python
+      - run_network_worker.py
+      - --client-id
+      - "1"
+      - --coordinator
+      - http://coordinator:8000
+      - --data-dir
+      - /app/data
+      - --log-dir
+      - /app/logs/client-1
+    depends_on:
+      coordinator:
+        condition: service_healthy
+    volumes:
+      - client_1_data:/app/data
+      - ./logs:/app/logs
+    restart: "no"
+
+  client-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: fl-client-2
+    init: true
+    environment:
+      FL_SHARED_TOKEN: ${FL_SHARED_TOKEN:-change-me}
+    command:
+      - python
+      - run_network_worker.py
+      - --client-id
+      - "2"
+      - --coordinator
+      - http://coordinator:8000
+      - --data-dir
+      - /app/data
+      - --log-dir
+      - /app/logs/client-2
+    depends_on:
+      coordinator:
+        condition: service_healthy
+    volumes:
+      - client_2_data:/app/data
+      - ./logs:/app/logs
+    restart: "no"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: fl-dashboard
+    init: true
+    command:
+      - python
+      - -m
+      - streamlit
+      - run
+      - dashboard/app.py
+      - --server.address
+      - 0.0.0.0
+      - --server.port
+      - "8501"
+      - --server.headless
+      - "true"
+      - --browser.gatherUsageStats
+      - "false"
+    depends_on:
+      coordinator:
+        condition: service_healthy
+    ports:
+      - "${FL_DASHBOARD_PORT:-8501}:8501"
+    volumes:
+      - ./results:/app/results
+    restart: "no"
+
+volumes:
+  coordinator_data:
+  client_1_data:
+  client_2_data:
